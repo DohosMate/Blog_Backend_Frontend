@@ -2,11 +2,13 @@ from flask import Flask, request
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 from os.path import isfile
+from flask_cors import CORS
 
 # create the extension
 db = SQLAlchemy()
 # create the app
 app = Flask(__name__)
+CORS(app)
 # configure the SQLite database, relative to the app instance folder
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
 # initialize the app with the extension
@@ -37,7 +39,7 @@ def get_allArticles():
     for article in articles:
         article_data = {'id': article.id,
                         'timestamp': article.timestamp,
-                        'title': article.timestamp,
+                        'title': article.title,
                         'article_description': article.article_description}
         output.append(article_data)
     return {'articles': output}
@@ -55,7 +57,10 @@ def add_article():
     posted_article = Article(title = request.json['title'], article_description = request.json['article_description'])
     db.session.add(posted_article)
     db.session.commit()
-    return {'id': posted_article.id}
+    return {'id': posted_article.id,
+            'timestamp': posted_article.timestamp,
+            'title': posted_article.title,
+            'article_description': posted_article.article_description}
 
 @app.route('/updateid<id>', methods=['PATCH'])
 def update_article(id):
@@ -63,7 +68,10 @@ def update_article(id):
     updated_article.title = request.json["title"]
     updated_article.article_description = request.json["article_description"]
     db.session.commit()
-    return {'id': updated_article.id}
+    return {'id': updated_article.id,
+            'timestamp': updated_article.timestamp,
+            'title': updated_article.title,
+            'article_description': updated_article.article_description}
 
 @app.route('/deleteid<id>', methods=['DELETE'])
 def delete_article(id):
